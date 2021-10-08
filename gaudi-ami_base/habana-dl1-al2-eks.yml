@@ -1,0 +1,80 @@
+{
+  "variables": {
+    "region": "us-west-2",
+    "flag": "eks-1.20",
+    "subnet_id": "subnet-4532e73d",
+    "security_groupids": "sg-092c73af8b33e6bab",
+    "build_ami": "ami-0494b922d4a70c8d6",
+    "habanalabs-driver-version": "1.0.1"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "region": "{{user `region`}}",
+    "source_ami": "{{user `build_ami`}}",
+    "run_tags": {
+        "Name": "packer-dl1-processor-{{user `flag`}}"
+    },
+    "subnet_id": "{{user `subnet_id`}}",
+    "security_group_ids": "{{user `security_groupids`}}",
+    "instance_type": "dl1.24xlarge",
+    "ssh_username": "ec2-user",
+    "ami_name": "al2-habana-dl1-fsx-processor_{{user `flag`}}-{{timestamp}}",
+    "launch_block_device_mappings":[{
+      "delete_on_termination": true,
+      "device_name": "/dev/xvda",
+      "volume_size": 200,
+      "throughput": 1000,
+      "iops": 8000,
+      "volume_type": "gp3"
+    }]
+ }],
+  "provisioners": [{
+    "type": "shell",
+    "expect_disconnect": true,
+    "inline": [
+      "sudo  yum update -y",
+      "sudo amazon-linux-extras disable kernel-5.4 -y",
+      "sudo amazon-linux-extras install lustre2.10 docker epel kernel-5.10 -y",
+      "sudo yum install yum-utils cmake sipcalc dkms mdadm git htop hwloc iftop kernel-tools rpm-build rpmdevtools numactl parallel pigz python2-pip python3-pip wget kernel-devel-$(uname -r) kernel-headers-$(uname -r) -y",
+      "sudo yum groupinstall 'Development Tools' -y",
+      "uname -r",
+      "sudo shutdown -r now"]
+    },
+    {
+    "type": "shell",
+    "inline_shebang": "/bin/bash -xe",
+    "inline": [
+      "echo '    StrictHostKeyChecking no' | sudo tee -a /etc/ssh/ssh_config",
+      "echo '    HostbasedAuthentication no' | sudo tee -a /etc/ssh/ssh_config",
+      "echo '    CheckHostIP no' | sudo tee -a /etc/ssh/ssh_config"]
+    },
+    {
+    "type": "shell",
+    "inline_shebang": "/bin/bash -xe",
+    "inline": [
+      "uname -r",
+      "sudo yum install kernel-devel-$(uname -r) kernel-headers-$(uname -r) -y",
+      "sudo yum-config-manager --add-repo=https://vault.habana.ai/artifactory/AmazonLinux2",
+      "sudo yum install habanalabs-container-runtime-{{user `habanalabs-driver-version`}} habanalabs-qual-{{user `habanalabs-driver-version`}} habanalabs-aeon-{{user `habanalabs-driver-version`}} habanalabs-{{user `habanalabs-driver-version`}} habanalabs-thunk-{{user `habanalabs-driver-version`}} habanalabs-firmware-{{user `habanalabs-driver-version`}} habanalabs-firmware-tools-{{user `habanalabs-driver-version`}} habanalabs-graph-{{user `habanalabs-driver-version`}} --nogpgcheck -y",
+      "echo 'vm.nr_hugepages=15000' | sudo tee -a /etc/sysctl.conf",
+      "sudo sysctl -p"]
+    },
+    {
+    "type": "shell",
+    "inline_shebang": "/bin/bash -xe",
+    "inline": [
+      "echo 'dl1.24xlarge 15' | sudo tee -a /etc/eks/eni-max-pods.txt"]
+    },
+    {
+    "type": "shell",
+    "inline_shebang": "/bin/bash -xe",
+    "inline": [
+      "distribution=$(. /etc/os-release;echo $ID$VERSION_ID)",
+      "sudo systemctl enable docker",
+      "sudo sed -i 's/^OPTIONS/#&/' /etc/sysconfig/docker",
+      "echo -e '{\"default-ulimits\":{\"memlock\":{\"Name\":\"memlock\",\"Soft\":-1,\"Hard\":-1}},\"default-runtime\":\"habana\",\"runtimes\":{\"habana\":{\"path\":\"/usr/bin/habana-container-runtime\",\"runtimeArgs\":[]}}}' | sudo tee /etc/docker/daemon.json",
+      "sudo systemctl restart docker",
+      "sudo usermod -aG docker $USER"]
+    }
+  ]
+}
