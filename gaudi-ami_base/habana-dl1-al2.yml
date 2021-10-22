@@ -5,7 +5,7 @@
     "subnet_id": "subnet-4532e73d",
     "security_groupids": "sg-092c73af8b33e6bab",
     "build_ami": "ami-0c2d06d50ce30b442",
-    "habanalabs-driver-version": "1.0.1"
+    "habanalabs-driver-version": "1.1.0"
   },
   "builders": [{
     "type": "amazon-ebs",
