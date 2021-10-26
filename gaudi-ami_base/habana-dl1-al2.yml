@@ -67,9 +67,6 @@
       "sudo yum install kernel-devel-$(uname -r) kernel-headers-$(uname -r) -y",
       "sudo yum-config-manager --add-repo=https://vault.habana.ai/artifactory/AmazonLinux2",
       "sudo yum install habanalabs-container-runtime-{{user `habanalabs-driver-version`}} habanalabs-qual-{{user `habanalabs-driver-version`}} habanalabs-aeon-{{user `habanalabs-driver-version`}} habanalabs-{{user `habanalabs-driver-version`}} habanalabs-thunk-{{user `habanalabs-driver-version`}} habanalabs-firmware-{{user `habanalabs-driver-version`}} habanalabs-firmware-tools-{{user `habanalabs-driver-version`}} habanalabs-graph-{{user `habanalabs-driver-version`}} --nogpgcheck -y",
-      "sudo dracut --force --omit-drivers habanalabs",
-      "echo 'blacklist habanalabs' | sudo tee /etc/modprobe.d/habanalabs.conf",
-      "echo 'blacklist habanalabs' | sudo tee /etc/dracut.conf.d/habanalabs.conf",
       "echo 'vm.nr_hugepages=15000' | sudo tee -a /etc/sysctl.conf",
       "sudo sysctl -p"]
     },
