@@ -10,7 +10,7 @@ In the `gaudi-ami_base` dir you will find packer scripts for Amazon Linux 2 and 
     "subnet_id": "subnet-4532e73d",
     "security_groupids": "sg-092c73af8b33e6bab",
     "build_ami": "ami-090717c950a5c34d3",
-    "habanalabs-driver-version": "1.0.1-81"
+    "habanalabs-driver-version": "1.1.0-614"
   },
 ````  
 After filling in the `variables` check that the packer script is validated.
