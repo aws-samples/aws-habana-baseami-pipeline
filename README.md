@@ -21,7 +21,7 @@ packer build habana-vt-al2.yml
 
 ## Sanity Check
 You can check that the 8x Gaudi Accelerators are available by running the `hl-smi` command
-![](https://github.com/aws-habana-baseami-pipeline/imgs/hl-smi.gif)
+![](https://github.com/aws-samples/aws-habana-baseami-pipeline/blob/main/imgs/hl-smi.gif)
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
